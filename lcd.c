@@ -18,9 +18,9 @@ static void lcd_write(Lcd_HandleTypeDef * lcd, uint8_t data, uint8_t len);
 
 /************************************** Function definitions **************************************/
 
-/**
- * Create new Lcd_HandleTypeDef and initialize the Lcd
- */
+/**++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ * Create new Lcd_HandleTypeDef and initialize the Lcd pins
+ *++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 Lcd_HandleTypeDef Lcd_create(
 		Lcd_PortType port[], Lcd_PinType pin[],
 		Lcd_PortType rs_port, Lcd_PinType rs_pin,
@@ -44,9 +44,9 @@ Lcd_HandleTypeDef Lcd_create(
 	return lcd;
 }
 
-/**
- * Initialize 16x2-lcd without cursor
- */
+/**++++++++++++++++++++++++++++++++++++
+ * Initialize 20x4-lcd without cursor
+ *++++++++++++++++++++++++++++++++++++*/
 void Lcd_init(Lcd_HandleTypeDef * lcd)
 {
 	if(lcd->mode == LCD_4_BIT_MODE)
