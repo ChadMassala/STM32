@@ -2,11 +2,11 @@
  * lcd.c
  *
  *  Created on: Jun 20, 2024
- *      Author: chadl
+ *      Author: CMTEQ
  */
 
 
-#include <lcd.h>
+#include <lcd2004.h>
 const uint8_t ROW_16[] = {0x00, 0x40, 0x10, 0x50};
 const uint8_t ROW_20[] = {0x00, 0x40, 0x14, 0x54};
 /************************************** Static declarations **************************************/
@@ -17,6 +17,7 @@ static void lcd_write(Lcd_HandleTypeDef * lcd, uint8_t data, uint8_t len);
 
 
 /************************************** Function definitions **************************************/
+
 
 /**++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  * Create new Lcd_HandleTypeDef and initialize the Lcd pins
@@ -44,6 +45,7 @@ Lcd_HandleTypeDef Lcd_create(
 	return lcd;
 }
 
+
 /**++++++++++++++++++++++++++++++++++++
  * Initialize 20x4-lcd without cursor
  *++++++++++++++++++++++++++++++++++++*/
@@ -53,20 +55,21 @@ void Lcd_init(Lcd_HandleTypeDef * lcd)
 	{
 			lcd_write_command(lcd, 0x33);
 			lcd_write_command(lcd, 0x32);
-			lcd_write_command(lcd, FUNCTION_SET | OPT_N);				// 4-bit mode
+			lcd_write_command(lcd, FUNCTION_SET | OPT_N); // Set LCD in 4-bit mode
 	}
-	else
+	else		
 		lcd_write_command(lcd, FUNCTION_SET | OPT_DL | OPT_N);
 
 
-	lcd_write_command(lcd, CLEAR_DISPLAY);						// Clear screen
+	lcd_write_command(lcd, CLEAR_DISPLAY);			       // Clear screen
 	lcd_write_command(lcd, DISPLAY_ON_OFF_CONTROL | OPT_D);		// Lcd-on, cursor-off, no-blink
-	lcd_write_command(lcd, ENTRY_MODE_SET | OPT_INC);			// Increment cursor
+	lcd_write_command(lcd, ENTRY_MODE_SET | OPT_INC);		// Increment cursor
 }
 
-/**
+
+/**+++++++++++++++++++++++++++++++++++++++++++
  * Write a number on the current position
- */
+ **+++++++++++++++++++++++++++++++++++++++++++*/
 void Lcd_int(Lcd_HandleTypeDef * lcd, int number)
 {
 	char buffer[11];
@@ -75,9 +78,9 @@ void Lcd_int(Lcd_HandleTypeDef * lcd, int number)
 	Lcd_string(lcd, buffer);
 }
 
-/**
+/**+++++++++++++++++++++++++++++++++++++++ 
  * Write a string on the current position
- */
+ *++++++++++++++++++++++++++++++++++++++++*/
 void Lcd_string(Lcd_HandleTypeDef * lcd, char * string)
 {
 	for(uint8_t i = 0; i < strlen(string); i++)
@@ -86,9 +89,9 @@ void Lcd_string(Lcd_HandleTypeDef * lcd, char * string)
 	}
 }
 
-/**
+/**++++++++++++++++++++++++++++++++++++++++++*
  * Set the cursor position
- */
+ *+++++++++++++++++++++++++++++++++++++++++++*/
 void Lcd_cursor(Lcd_HandleTypeDef * lcd, uint8_t row, uint8_t col)
 {
 	#ifdef LCD20xN
@@ -100,9 +103,9 @@ void Lcd_cursor(Lcd_HandleTypeDef * lcd, uint8_t row, uint8_t col)
 	#endif
 }
 
-/**
+/**++++++++++++++++++*
  * Clear the screen
- */
+ *++++++++++++++++++++*/
 void Lcd_clear(Lcd_HandleTypeDef * lcd) {
 	lcd_write_command(lcd, CLEAR_DISPLAY);
 }
@@ -115,15 +118,12 @@ void Lcd_define_char(Lcd_HandleTypeDef * lcd, uint8_t code, uint8_t bitmap[]){
 
 }
 
-
-/************************************** Static function definition **************************************/
-
-/**
+/**+++++++++++++++++++++++++++++++++++++++*
  * Write a byte to the command register
- */
+ *+++++++++++++++++++++++++++++++++++++++*/
 void lcd_write_command(Lcd_HandleTypeDef * lcd, uint8_t command)
 {
-	HAL_GPIO_WritePin(lcd->rs_port, lcd->rs_pin, LCD_COMMAND_REG);		// Write to command register
+	HAL_GPIO_WritePin(lcd->rs_port, lcd->rs_pin, LCD_COMMAND_REG);	 // Write to command register
 
 	if(lcd->mode == LCD_4_BIT_MODE)
 	{
@@ -137,15 +137,15 @@ void lcd_write_command(Lcd_HandleTypeDef * lcd, uint8_t command)
 
 }
 
-/**
+/**+++++++++++++++++++++++++++++++++++*
  * Write a byte to the data register
- */
+ *++++++++++++++++++++++++++++++++++++*/
 void lcd_write_data(Lcd_HandleTypeDef * lcd, uint8_t data)
 {
-	HAL_GPIO_WritePin(lcd->rs_port, lcd->rs_pin, LCD_DATA_REG);			// Write to data register
+	HAL_GPIO_WritePin(lcd->rs_port, lcd->rs_pin, LCD_DATA_REG);  // Write to data register
 
 	if(lcd->mode == LCD_4_BIT_MODE)
-	{
+	{		
 		lcd_write(lcd, data >> 4, LCD_NIB);
 		lcd_write(lcd, data & 0x0F, LCD_NIB);
 	}
@@ -156,9 +156,9 @@ void lcd_write_data(Lcd_HandleTypeDef * lcd, uint8_t data)
 
 }
 
-/**
+/**+++++++++++++++++++++++++++++++++++++++++++++++++++*
  * Set len bits on the bus and toggle the enable line
- */
+ *++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 void lcd_write(Lcd_HandleTypeDef * lcd, uint8_t data, uint8_t len)
 {
 	for(uint8_t i = 0; i < len; i++)
@@ -168,9 +168,12 @@ void lcd_write(Lcd_HandleTypeDef * lcd, uint8_t data, uint8_t len)
 
 	HAL_GPIO_WritePin(lcd->en_port, lcd->en_pin, 1);
 	DELAY(1);
-	HAL_GPIO_WritePin(lcd->en_port, lcd->en_pin, 0); 		// Data receive on falling edge
+	HAL_GPIO_WritePin(lcd->en_port, lcd->en_pin, 0); 	 // Data receive on falling edge
 }
 
+/**++++++++++++++++++++++++*
+ * Display Interger on LCD
+ *+++++++++++++++++++++++++*/
 void display_int_on_lcd(Lcd_HandleTypeDef *lcd, int number) {
     char buffer[12]; // Buffer to hold the converted string. Size 12 to hold up to 10 digits plus sign and null terminator.
     snprintf(buffer, sizeof(buffer), "%d", number); // Convert integer to string
@@ -181,3 +184,4 @@ void display_int_on_lcd(Lcd_HandleTypeDef *lcd, int number) {
     Lcd_string(lcd, buffer); // Pass the string to the Lcd_string function
 }
 
+//END
